@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); // The foreign key column
             $table->string('projectName');
             $table->string('descriptions');
-            $table->string('status');
+            $table->boolean('status')->default(false);
             $table->date('dueDate');
             $table->timestamps();
 

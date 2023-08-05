@@ -15,6 +15,7 @@ class project extends Model
         'dueDate',
         'descriptions',
         'user_id',
+        'status'
     ];
     public function user()
     {
@@ -25,9 +26,12 @@ class project extends Model
     {
         return $this->hasMany(tasks::class, 'project_id', 'id');
     }
+    protected $casts = [
 
-  /*   public function tasks()
+        'status' => 'boolean',
+    ];
+    public function status()
     {
-        return $this->hasMany(Task::class);
-    } */
+        return $this->status();
+    }
 }
