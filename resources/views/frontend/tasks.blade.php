@@ -2,11 +2,12 @@
 
 
 @section('content')
+
     <div class="right-section">
 
         <div class="top">
 
-            <span>Projects</span>
+            <span>Projects / Tasks</span>
             <div class="top-right">
                 <a href="{{ route('profile') }}">
 
@@ -31,6 +32,8 @@
                 {{ session('success') }}
             </div>
         @endif
+        <div id="notification-container" class="alert alert-success" style="display: none;"></div>
+
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
@@ -270,50 +273,101 @@
             .table {
                 padding: 0rem 3rem;
             }
+     
+                    a {
+                        color: black;
+                        text-decoration: none;
+                    }
+
+
+
+                    td .tableLinks {
+
+                        display: flex;
+                        flex-direction: row;
+                        flex-wrap: wrap;
+
+                        justify-content: space-between;
+                    }
+
+                    .tableLinks a:hover {
+                        color: #9CCD62;
+                    }
+
+                    .tableLinks a {
+                        background-color: #3C3D42;
+                        padding: 0.1rem 0.8rem;
+                        color: #F6F8E2;
+
+
+
+                    }
+
+                    .tableLinks button:hover {
+                        color: #F6F8E2;
+                    }
+
+                    .tableLinks button {
+                        padding: 0.1rem 0.3rem;
+                        border: none;
+                        background-color: #3C3D42;
+                        color: #ed7575;
+                    }
+           
         </style>
-        <div id="projectModal" class="modal-container">
-            <!-- Modal content -->
-            <div class="modal-content1">
-                <div class="form-container">
+        <div id="taskModal" class="modal-container">
+                <!-- Modal content -->
+                <div class="modal-content1">
+                    <div class="form-container">
 
-                    <form method="POST" action="{{ route('createProject') }}" class="form">
-                        @csrf
-                        <p class="form-title">Add a new Project</p>
-                        <div class="input-container">
-                            <label for="duaDate"> Project name</label>
-                            <input type="name" name="projectName" placeholder="Enter Project Name">
-                        </div>
-                        <div class="input-container">
-                            <label for="duaDate">Due Date</label>
-                            <input type="date" name="dueDate" placeholder="Enter due date">
-                            <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+                    <form method="post" action="{{ route('tasks.store') }}">
+                             @csrf
+                            <p class="form-title">Add a new Project</p>
+                            <div class="input-container">
+                                <label for="duaDate">Descriptions</label>
+                                <br><hr>
+                                <textarea name="description" id="" placeholder="Enter Details" cols="70" rows="4"></textarea>
 
-                        </div>
-                        <div class="input-container">
-                            <label for="duaDate">Descriptions</label><br>
-                            <textarea name="descriptions" id="" placeholder="Enter Details" cols="39" rows="5"></textarea>
+                            </div>
+                            <div class="input-container">
+                            <label for="duaDate">Select a Project</label><hr>
+                            <div class="d-flex gap-5">
+                            <div><a href="{{route('projects')}}" class="btn btn-primary">Create a new project</a></div>
+    <select name="project_id"  id="project_id" class="form-control" placeholder="Enter Details">
+        <!-- Populate the options dynamically from the properties table -->
+        @foreach ($projects as $project)
+            <option value="{{ $project->id }}"  data-name="{{ $project->projectName }}" >
+                {{ $project->projectName }}
+            </option>
+        
+        @endforeach
+    </select>
 
-                        </div>
-                        <button type="submit" class="submit">
-                            Create
-                        </button>
-                    </form>
-                    <button onclick="closeModal()" class="close">Cancel</button>
+
+    </div>
+                                                
+                                            </div>
+                                            <hr>
+                                            <input type="hidden" class="form-control" id="projectName" name="title" readonly>
+                            <button type="submit" class="submit">
+                                Create
+                            </button>
+                        </form>
+                        <button onclick="closeModal()" class="close">Cancel</button>
+                    </div>
                 </div>
+
             </div>
-
-        </div>
-
         <div class="search-container">
 
 
-            <form action="{{ route('tasks') }}" method="GET">
-                <input type="text" name="search" value="{{ $search }}" placeholder="Search task">
+            <form action="" method="GET">
+                <input type="text" name="search" value="" placeholder="Search task">
                 <button type="submit"><ion-icon name="search-outline"></ion-icon></button>
             </form>
             <div class="create">
                 <button onclick="openModal()" class="open">Create New Task</button>
-            </div>
+            </div> 
 
         </div>
 
@@ -322,10 +376,10 @@
 
 
 
-            @if ($tasks->isEmpty() && !$search)
-                <p>No Task found. Please Create a Project.</p>
-            @elseif ($tasks->isEmpty() && $search)
-                <p>No tasks found for "{{ $search }}"</p>
+            @if ($tasks->isEmpty())
+                <p>No Task found. Please Create a Task.</p>
+            @elseif ($tasks->isEmpty())
+                <p>No tasks found for ""</p>
             @elseif ($tasks->isNotEmpty())
                 <table>
                     <style>
@@ -337,7 +391,7 @@
 
                         th,
                         td {
-                            padding: 15px;
+                            padding: 5px;
                         }
 
 
@@ -352,32 +406,102 @@
 
                         td {
                             font-size: 1rem;
-                            font-family: ;
+                            
                         }
                     </style>
                     <thead>
                         <tr>
                             <th>S.N</th>
                             <th>Task Name</th>
-                            <!-- Add other table headers as needed -->
                             <th>Project Name</th>
-                            <th>Created At</th>
-                            <th>Start</th>
+                            <th>Started At</th>
+                            <th>Completed At</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($tasks as $task)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $task->taskName }}</td>
-                                <td>{{ $task->project->projectName }}</td>
-                                <td>{{ $task->created_at->format('Y-m-d') }}</td>
+                    @if ($tasks->isEmpty())
+            <tr>
+                <td colspan="4">No tasks found.</td>
+            </tr>
+        @else
+            @foreach ($tasks as $task)
+                <tr>
+                <td>{{ $loop->iteration }}</td>
+                    <td>{{ $task->description}}</td>
+                    <td>{{ $task->title}}</td>
+                    <td>{{ $task->started_at ?? 'Not started' }}</td>
+                    <td>{{ $task->completed_at ?? 'Not completed' }}</td>
+                    <td>
+                      
+                        <div class="tableLinks">
+                       @if (!$task->is_completed)
+                            @if ($task->started_at)
+                                <form method="post" action="{{ route('tasks.stop', $task) }}">
+                                    @csrf
+                                    <button type="submit">Stop Timer</button>
+                                </form>
+                            @else
+                                <form method="post" action="{{ route('tasks.start', $task) }}">
+                                    @csrf
+                                    <button type="submit">Start Timer</button>
+                                </form>
+                            @endif
+                        @endif
+                    
+                                                        <button type="button" class="btn btn-danger " data-bs-toggle="modal"
+                                                        data-bs-target="#modalId{{ $task->id }}">
+                                                        Delete
+                                                    </button>
+
+                                                    <!-- Modal Body -->
+                                                    <!-- if you want to close by clicking outside the modal, delete the last endpoint:data-bs-backdrop and data-bs-keyboard -->
+                                                    <div class="modal fade" id="modalId{{ $task->id }}" tabindex="-1"
+                                                        data-bs-backdrop="static" data-bs-keyboard="false" role="dialog"
+                                                        aria-labelledby="modalTitleId" aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm"
+                                                            role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="modalTitleId">Delete Form
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close"
+                                                                        data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    Are you sure you want to delete?
+                                                                    {{ $task->title }}
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-success"
+                                                                        data-bs-dismiss="modal">Cancel</button>
+
+                                                                    <form
+                                                                        action="{{ route('tasks.destroy', $task->id) }}"
+                                                                        method="POST" enctype="multipart/form-data">
+                                                                        @method('DELETE')
+                                                                        @csrf
+                                                                        <button type="submit"
+                                                                            class="btn btn-danger">Delete</button>
+                                                                    </form>
 
 
-                                {{--  <td><a href="{{ route('vprojects', ['project_id' => $project->id]) }}">View</a>
-                                    <!-- Add other table cells for project data -->
-                            </tr> --}}
-                        @endforeach
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <!-- Optional: Place to the bottom of scripts -->
+                                                    <script>
+                                                        const myModal = new bootstrap.Modal(document.getElementById('modalId'), options)
+                                                    </script>
+                                            </form>
+                                        </div>
+                    </td>
+                </tr>
+            @endforeach
+        @endif
                     </tbody>
                 </table>
             @else
@@ -388,12 +512,12 @@
             <script>
                 // JavaScript functions to handle the modal
                 function openModal() {
-                    var modal = document.getElementById('projectModal');
+                    var modal = document.getElementById('taskModal');
                     modal.style.display = 'block';
                 }
 
                 function closeModal() {
-                    var modal = document.getElementById('projectModal');
+                    var modal = document.getElementById('taskModal');
                     modal.style.display = 'none';
                 }
 
@@ -401,8 +525,82 @@
                 setTimeout(function() {
                     document.getElementById('flash-message').style.display = 'none';
                 }, 3000); // 5000 milliseconds = 5 seconds
-            </script>
+                //
 
+                document.addEventListener('DOMContentLoaded', function() {
+                    var startButton = document.getElementById('startButton');
+                    var stopButton = document.getElementById('stopButton');
+
+                    // Retrieve the task started state from localStorage
+                    var isTaskStarted = localStorage.getItem('taskStarted');
+
+                    // Update button visibility based on the retrieved state
+                    if (isTaskStarted === 'true') {
+                        startButton.style.display = 'none';
+                        stopButton.style.display = 'block';
+                    } else {
+                        startButton.style.display = 'block';
+                        stopButton.style.display = 'none';
+                    }
+
+                    startButton.addEventListener('click', function() {
+                        // Update localStorage to indicate task is started
+                        localStorage.setItem('taskStarted', 'true');
+
+                        // Update button visibility
+                        startButton.style.display = 'none';
+                        stopButton.style.display = 'block';
+                    });
+
+                    stopButton.addEventListener('click', function() {
+                        // Update localStorage to indicate task is stopped
+                        localStorage.setItem('taskStarted', 'false');
+
+                        // Update button visibility
+                        stopButton.style.display = 'none';
+                        startButton.style.display = 'block';
+                    });
+                });
+
+                document.getElementById('project_id').addEventListener('change', function() {
+        var selectedOption = this.options[this.selectedIndex];
+        var vehicleAfterPrice = selectedOption.getAttribute('data-name');
+
+        document.getElementById('projectName').value = vehicleAfterPrice;
+      });
+      
+    
+
+                //
+                $(document).ready(function() {
+                    $(".start-time-form").submit(function(event) {
+                        event.preventDefault();
+
+                        var form = $(this);
+
+                        $.ajax({
+                            url: form.attr("action"),
+                            type: "POST",
+                            data: form.serialize(),
+                            dataType: "json", // Ensure this is set to JSON
+                            success: function(response) {
+                                console.log(response.message);
+
+                                var notificationContainer = $('#notification-container');
+                                notificationContainer.html(response.message).slideDown();
+
+                                // Hide the notification after a delay (e.g., 5 seconds)
+                                setTimeout(function() {
+                                    notificationContainer.slideUp();
+                                }, 3000);
+                            },
+                            error: function(xhr) {
+                                console.error("Error: " + xhr.responseText);
+                            }
+                        });
+                    });
+                });
+            </script>
 
         </div>
 

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Login</title>
+    <title>Reset Password</title>
 </head>
 
 <body>
@@ -81,55 +81,47 @@
             text-decoration: underline;
         }
     </style>
-
-    <div class="card-body">
-        @if (session('status'))
-            <div class="alert alert-success" role="alert">
-                {{ session('status') }}
-            </div>
-        @endif
-        @if ($errors->any())
-            <div>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <div class="container">
-            <h1>Login to Time Tracker</h1>
-
-            <form method="POST" action="{{ route('login') }}" class="form">
-                @csrf
-                <p class="form-title">Sign in to your account</p>
-                <div class="input-container">
-                    <input type="email" name="email" placeholder="Enter email" value="{{ old('email') }}">
-                    <span>
-                    </span>
-                </div>
-                <div class="input-container">
-                    <input type="password" name="password" placeholder="Enter password">
-                </div>
-                <button type="submit" class="submit">
-                    Sign in
-                </button>
-
-                <p class="signup-link">
-                    No account ?
-                    <a href="{{ route('register') }}"> Register</a>
-
-                </p>
-                <p class="signup-link">
-                    Forgot Password ?
-                    <a href=""> Reset</a>
-
-                </p>
-            </form>
-
-
+    @if ($errors->any())
+        <div>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
+    @endif
+
+    <div class="container">
+        <h1>Reset Password</h1>
+
+        <form method="POST" action="{{ route('password.update') }}"class="form">
+            @csrf
+            <p class="form-title"></p>
+            <div class="input-container">
+
+                <input type="hidden" name="token" value="{{ $token }}">
+                <input type="hidden" name="email" value="{{ $email }}">
+
+            </div>
+            <div class="input-container">
+                <input type="password" name="password" placeholder="Enter New Password">
+            </div>
+            <div class="input-container">
+                <input type="password" name="password_confirmation" placeholder="Re-Enter Password">
+            </div>
+            <button type="submit" class="submit">
+                Sign in
+            </button>
+
+            <p class="signup-link">
+                Go Back
+                <a href="{{ route('profile') }}"> Back</a>
+
+            </p>
+        </form>
+
+
+    </div>
 
 </body>
 

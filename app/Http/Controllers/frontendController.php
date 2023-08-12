@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-
+use Illuminate\Support\Facades\Session;
+use Carbon\Carbon;
 use App\Models\project;
 use App\Models\tasks;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +16,11 @@ class frontendController extends Controller
         return view('ok');
     }
     public function index()
+
     {
-        return view('frontend.dashboard');
+        $tasks = tasks::all();
+        $projects = project::all();
+        return view('frontend.dashboard', compact('tasks', 'projects'));
     }
     public function profilepage()
     {
@@ -44,12 +48,19 @@ class frontendController extends Controller
         $search = $request->input('search', '');
 
         $user_id = Auth::id();
+        $task = tasks::with('projects')->find(1);
 
-        $tasks = tasks::where('user_id', $user_id)
+
+        /*  $tasks = tasks::with('project')->get();
+
+        dd($tasks->project->projectName); */
+        $tasks = Tasks::where('user_id', $user_id)
             ->when($search, function ($query) use ($search) {
-                $query->where('projectName', 'like', '%' . $search . '%');
+                $query->where('taskname', 'like', '%' . $search . '%');
             })
             ->paginate(5);
-        return view('frontend.tasks', compact('tasks', 'search'));
+
+        $savedTimestamp = Session::get('savedTimestamp');
+        return view('frontend.tasks', compact('tasks', 'search', 'savedTimestamp'));
     }
 }

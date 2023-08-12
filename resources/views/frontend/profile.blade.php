@@ -7,6 +7,11 @@
 
 
         <h4 class="profile_heading"> <span>Home/</span> Profile</h4>
+        @if (session('success'))
+            <div class="alert alert-success " id="flash-message">
+                {{ session('success') }}
+            </div>
+        @endif
         <div class="profile">
 
             <div class="card">
@@ -147,16 +152,41 @@
                             d="m65.07 78.93-.55.55a.73.73 0 0 1 -1 0l-.55-.55c-1.14-1.14-2.93-.93-4.27.47l-1.7 1.6h14l-1.66-1.6c-1.34-1.4-3.13-1.61-4.27-.47z"
                             fill="#f85565"></path>
                     </svg></div>
-                <div class="card__title">Cameron Williamson</div>
-                <div class="card__subtitle">Web Development</div>
-                <div class="card__wrapper">
-                    <button class="card__btn">Edit</button>
-                    <button class="card__btn card__btn-solid">History</button>
+                <div class="card__title">User Name : {{ Auth::user()->name }}</div>
+                <div class="card__subtitle"> Email : {{ Auth::user()->email }}</div>
+                <div class="card__subtitle"> Total Projects : {{ Auth::user()->projects->count() }}</div>
+
+
+                <div class="editLinks">
+
+                    <a href="{{ route('editProfile') }}"> Edit</a>
+
+                    <a href="{{ route('reset') }}"> Reset Password</a>
                 </div>
             </div>
         </div>
 
         <style>
+            .editLinks {
+                padding: 1rem
+            }
+
+            .editLinks a {
+                text-decoration: none;
+                padding: 0.2rem 0.6rem;
+                background-color: #010000;
+                color: white;
+                border-radius: 3px;
+
+            }
+
+            .editLinks a:hover {
+                text-decoration: none;
+                padding: 0.2rem 0.6rem;
+                background-color: #8c8888;
+                color: rgb(204, 198, 198);
+            }
+
             .profile_heading {
                 position: relative;
                 padding: 2rem 0 1rem 4rem;
@@ -209,7 +239,7 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                top: calc(50% - 57px);
+                top: calc(45% - 57px);
             }
 
             .card__avatar svg {

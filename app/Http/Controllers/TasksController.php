@@ -2,101 +2,99 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\project;
 use App\Models\tasks;
-use Carbon\Carbon;
+use Illuminate\Console\View\Components\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class TasksController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
+        $tasks = tasks::all();
+        $projects = project::all();
+        return view('frontend.tasks', compact('tasks' , 'projects'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+  
     public function create()
     {
-        //
+        return view('tasks.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
-        $request->validate([
-            'taskName' => 'required|string|max:255',
-            'description' => 'nullable|string|max:255',
-            'project_id' => 'required', // Add this line to validate the presence of project_id
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'project_id' => 'required',
+        
+    ]);
+
+    $projects = project::find($request->project_id);
+    $title = $projects->projectName;
+    $tasks = new tasks();
+    $tasks->description = $request->description;
+    $tasks->project_id = $request->project_id;
+    $tasks->title = $title;
+    $tasks->save();
+    return redirect()->route('tasks.index')->with('message', 'Task created successfully.');
+}
+
+
+    public function show(tasks $task)
+    {
+      
+        return view('tasks.show', compact('task'));
+    }
+
+    public function edit($id)
+    {
+        $projects = project::all();
+        $task = tasks::all();
+        $task = $task->where('id', $id)->first();
+        return view('frontend.edittasks', compact('task', 'projects'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $task = new tasks;
+        $task = $task->where('id', $id)->First();
+        $task->description = $request->description;
+        $task->project_id = $request->project_id;
+        $task->update();
+
+        return redirect()->route('tasks.index')->with('message', 'Task updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $task = new tasks;
+        $task = $task->where('id', $id)->first();
+  
+        $task->delete();
+
+        return redirect()->route('tasks.index')->with('message', 'Task deleted successfully.');
+    }
+
+    public function startTimer(Request $request, tasks $task)
+    {
+        $task->update([
+            'started_at' => now(),
         ]);
 
-        // Create and save the task with start time
-        $task = tasks::create([
-            'user_id' => auth()->id(),
-            'project_id' => $request->input('project_id'),
-            'taskname' => $request->input('taskname'),
-            'description' => $request->input('description'),
-            'start_time' => Carbon::now(),
+        return redirect()->back()->with('message', 'Timer started.');
+    }
+
+    public function stopTimer(Request $request, tasks $task)
+    {
+        $task->update([
+            'completed_at' => now(),
+            'is_completed' => true,
         ]);
 
-        // Redirect or do other actions
-        return redirect()->route('frontend.task')->with('success', 'Task created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\tasks  $tasks
-     * @return \Illuminate\Http\Response
-     */
-    public function show(tasks $tasks)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\tasks  $tasks
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(tasks $tasks)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\tasks  $tasks
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, tasks $tasks)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\tasks  $tasks
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(tasks $tasks)
-    {
-        //
+        return redirect()->back()->with('message', 'Timer stopped.');
     }
 }

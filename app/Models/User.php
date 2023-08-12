@@ -20,7 +20,6 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'phone',
         'password',
     ];
 
@@ -41,12 +40,15 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'role' => 'boolean',
     ];
 
     public function projects()
     {
-        return $this->hasMany(Project::class, 'user_id', 'id');
+        return $this->hasMany(project::class, 'user_id', 'id');
     }
-
-    
+    public function tasks()
+    {
+        return $this->hasMany(tasks::class);
+    }
 }

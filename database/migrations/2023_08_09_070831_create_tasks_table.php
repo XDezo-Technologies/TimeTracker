@@ -15,19 +15,18 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('user_id');
-            $table->string('taskname')->nullable(false);
+            $table->string('title');
             $table->text('description')->nullable();
-            $table->dateTime('start_time')->nullable();
-            $table->dateTime('end_time')->nullable();
+            $table->boolean('is_completed')->default(false);
+            $table->timestamp('started_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
+            $table->unsignedBigInteger('project_id');
+            $table->foreign('project_id')
+            ->references('id')->on('projects')->onDelete('cascade');
             $table->timestamps();
-
-            // Add foreign key constraints with ON CASCADE DELETE
-            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
+    
 
     /**
      * Reverse the migrations.

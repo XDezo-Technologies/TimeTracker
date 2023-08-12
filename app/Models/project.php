@@ -15,23 +15,22 @@ class project extends Model
         'dueDate',
         'descriptions',
         'user_id',
-        'status'
     ];
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
-
-    public function tasks()
-    {
-        return $this->hasMany(tasks::class, 'project_id', 'id');
-    }
     protected $casts = [
 
         'status' => 'boolean',
     ];
-    public function status()
+    public function tasks()
     {
-        return $this->status();
+        return $this->hasMany(tasks::class);
     }
+
+    /*   public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    } */
 }
